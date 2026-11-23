@@ -63,25 +63,25 @@ The source data intentionally contains unmatched customer and product IDs to exe
 
 Five tasks run in sequence: `SQL_Clear_Tables` truncates all destination and staging tables so each run starts from a clean state, then `DFT_Load_Customers` and `DFT_Load_Products` populate the staging tables (required before sales, because the sales Lookups reference them), then `DFT_Process_Sales` runs the main sales pipeline, and finally `SQL_Final_Summary` executes summary queries (valid row count, rejected row count, total sales amount).
 
-![Control Flow](screenshots/01-control-flow.png)
+![Control Flow](screenshots/01-control-flow.png.jpeg)
 
 ### Data Flow 1 - Load Customers
 
 Excel Source -> Data Conversion (CustomerID to integer, JoinDate to date) -> Derived Column (`CustomerNameClean` = trimmed, uppercase name) -> OLE DB Destination `dbo.StgCustomers`.
 
-![Data Flow Customers](screenshots/02-data-flow-customers.png)
+![Data Flow Customers](screenshots/02-data-flow-customers.png.jpeg)
 
 ### Data Flow 2 - Load Products
 
 Excel Source -> Data Conversion (ProductCode, Category, UnitPrice to compatible types) -> OLE DB Destination `dbo.StgProducts`.
 
-![Data Flow Products](screenshots/03-data-flow-products.png)
+![Data Flow Products](screenshots/03-data-flow-products.png.jpeg)
 
 ### Data Flow 3 - Process Sales
 
 Two Flat File Sources read the store and online sales. Each stream gets a Data Conversion and a Derived Column (`TotalAmount = Quantity * UnitPrice`), then Union All merges them into one stream of 14 rows. `RC_TotalSales` records the total. `LKP_Customers` and `LKP_Products` validate each row against the staging tables; no-match rows get a rejection reason via Derived Columns. A Conditional Split keeps rows with `Quantity > 0 AND UnitPrice >= 0` as valid and sends the rest to the rejection flow. Valid rows load into `dbo.FactSales`, rejected rows into `dbo.RejectedSales` with their `RejectReason`.
 
-![Data Flow Sales](screenshots/04-data-flow-sales.png)
+![Data Flow Sales](screenshots/04-data-flow-sales.png.jpeg)
 
 ## Results
 
@@ -98,7 +98,7 @@ After execution (verified in SQL Server):
 
 **Rejection breakdown:** 1 Unknown Customer, 2 Unknown Product.
 
-![Summary Query](screenshots/09-summary-query.png)
+![Summary Query](screenshots/09-summary-query.png.jpeg)
 
 ### Row Count Verification
 
